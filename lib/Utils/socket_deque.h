@@ -2,72 +2,46 @@
 #define STUB_UTILS_SOCKET_DEQUE
 
 #include "PrimitiveType/primitive_type.h"
-#include "WinSock2.h"
+#include <WinSock2.h>
+#include <Synchapi.h>
 
 namespace stub {
 namespace utils {
 
-struct Node {
+// Defines
+#define NODE_CACHE_SIZE 5
+#define SPIN_COUNT 0x00000400
+
+struct SocketNode {
     SOCKET socket_;
-    Node *next_;
+    SocketNode *next_;
 };
 
 class SocketDeque {
 public:
-    SocketDeque() : front_(nullptr), back_(nullptr), size_(0) {}
-    
-    ~SocketDeque() {
-        Node *curr = front_;
-        while (curr != nullptr) {
-            Node *temp = curr;
-            curr = curr->next_;
-            delete temp;
-        }
-    }
+    SocketDeque();
+    ~SocketDeque();
 
-    void Push(SOCKET socket) {
-        Node *new_node = new Node();
-        new_node->socket_ = socket;
-        new_node->next_ = nullptr;
+    void Push(SOCKET socket);
+    SOCKET Pop();
+    primitive_type::uint32 size();
 
-        if (size_ == 0) {
-            front_ = new_node;
-            back_ = new_node;
-        } else {
-            back_->next_ = new_node;
-            back_ = new_node;
-        }
-        ++size_;
-    }
-
-    SOCKET Front() {
-        if (size_ == 0) return INVALID_SOCKET;
-        return front_->socket_;
-    }
-
-    void Pop() {
-        Node *prev_front;
-        if (size_ == 0) return;
-        else if (size_ == 1) {
-            delete front_;
-            front_ = nullptr;
-            back_ = nullptr;
-        } else {
-            prev_front = front_;
-            front_ = front_->next_;
-            delete prev_front;
-        }
-        --size_;
-    }
-
-    primitive_type::uint32 size() {
-        return size_;
-    }
+    void Terminate();
 
 private:
-    Node *front_;
-    Node *back_;
-    primitive_type::uint32 size_;    
+    // Deque items
+    SocketNode *front_;
+    SocketNode *back_;
+    primitive_type::uint32 size_;
+
+    // Store unused nodes for efficiency
+    SocketNode *node_cache_[NODE_CACHE_SIZE];
+    primitive_type::uint8 cache_size_;
+
+    // Synchronization items
+    CRITICAL_SECTION critical_section_;
+    CONDITION_VARIABLE not_empty_;
+    primitive_type::uint8 terminate_;
 };
 
 };
