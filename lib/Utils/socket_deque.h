@@ -8,6 +8,8 @@
 namespace stub {
 namespace utils {
 
+// TODO: Change to work with functor objects
+
 // Defines
 #define NODE_CACHE_SIZE 5
 #define SPIN_COUNT 0x00000400
