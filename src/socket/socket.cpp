@@ -69,7 +69,27 @@ void Socket::Connect(const char *hostname, const char *port) {
 }
 
 void Socket::Bind(uint16 port) {
+    struct sockaddr_in serv_addr;
     
+    // Set up the serv_addr
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(port);
+    serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    // Bind to the socket
+    if (bind(sockfd_, (sockaddr*) &serv_addr, sizeof(serv_addr)) != 0) 
+        throw SocketException(errno);
 }
 
+void Socket::Listen(uint32 backlog) {
+    if (listen(sockfd_, backlog) == -1)
+        throw SocketException(errno);
+}
 
+Socket Socket::Accept() {
+    uint32 ret_val;
+    if ((ret_val = accept(sockfd_, nullptr, nullptr)) == -1)
+        throw SocketException(errno);
+    return Socket(ret_val);
+}

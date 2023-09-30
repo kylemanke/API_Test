@@ -7,7 +7,7 @@ class Socket {
 public:
     /// @brief Creates a TCP, IPv4 Socket
     Socket();
-    Socket(int32 sockfd)
+    Socket(int32 sockfd);
 
     /// @brief Currently does nothing
     ~Socket();

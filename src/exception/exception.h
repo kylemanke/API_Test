@@ -6,6 +6,7 @@
 
 #include "types.h"
 
+/// @brief Exception throw when a socket error occurs
 class SocketException : public std::exception 
 {
 public:
