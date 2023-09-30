@@ -3,6 +3,8 @@
 
 #include "types.h"
 
+// TODO: Rewrite to use buffered I/O for higher performance read writes
+
 class Socket {
 public:
     /// @brief Creates a TCP, IPv4 Socket
