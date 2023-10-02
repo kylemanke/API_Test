@@ -3,16 +3,19 @@
 
 #include "types.h"
 
-// TODO: Rewrite to use buffered I/O for higher performance read writes
-
 class Socket {
 public:
     /// @brief Creates a TCP, IPv4 Socket
     Socket();
     Socket(int32 sockfd);
+    Socket(Socket &sock);
 
     /// @brief Currently does nothing
     ~Socket();
+
+    /// @brief Checks if socket has valid socket file descriptor
+    /// @return True is socket has valid file descriptor
+    bool Valid();
 
     /// @brief Read in buff_size bytes into buffer
     /// @param buffer Destination buffer

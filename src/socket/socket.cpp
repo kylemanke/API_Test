@@ -5,7 +5,7 @@
 
 #include <cstring>
 
-#include "exception.h"
+#include "exception/exception.h"
 #include "socket.h"
 
 Socket::Socket() {
@@ -19,8 +19,16 @@ Socket::Socket(int32 sockfd) {
     sockfd_ = sockfd;
 }
 
+Socket::Socket(Socket &sock) {
+    sockfd_ = sock.sockfd_;
+}
+
 Socket::~Socket() {
     // Pass
+}
+
+bool Socket::Valid() {
+    return !(sockfd_ == -1);
 }
 
 int32 Socket::Recv(char *buffer, uint32 buff_size) {
@@ -40,6 +48,7 @@ int32 Socket::Send(const char *buffer, uint32 buff_size) {
 void Socket::Shutdown() {
     if (shutdown(sockfd_, SHUT_RDWR) == -1)
         throw SocketException(errno);
+    sockfd_ = -1;
 }
 
 void Socket::Connect(const char *hostname, const char *port) {

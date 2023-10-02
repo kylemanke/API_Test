@@ -5,6 +5,10 @@
 
 #include "robin_hood.h"
 
+#include "types.h"
+
+#define CRLF "\r\n"
+
 // Define needed enums
 enum class HTTPMethod {
     kGet,
@@ -24,6 +28,8 @@ enum class HTTPVersion {
     kHTTP_1_1,
     kHTTP_2_0
 };
+
+enum class HTTPMessageType {kResponse, kRequest};
 
 enum class HTTPStatusCode {
     k100, k101, k102, k103,
@@ -46,6 +52,16 @@ struct HTTPRequest {
     RequestStartLine start_line_;
     robin_hood::unordered_flat_map<std::string, std::string> headers_;
     char* body_;
+    uint32 body_size_;
+
+    /// @brief Function to turn HTTPRequest Struct into its string version
+    /// @return Formatted HTTP request message
+    std::string fmt() {
+        std::string str = "";
+
+        // Begin with Start Line
+        str += "HTTP/";
+    }
 };
 
 /// @brief Struct representing status line of HTTP Response
@@ -59,6 +75,11 @@ struct HTTPResponse {
     ResponseStatusLine status_line_;
     robin_hood::unordered_flat_map<std::string, std::string> headers_;
     char* body_;
+    uint32 body_size_;
+
+    std::string fmt() {
+        // TODO
+    }
 };
 
 #endif

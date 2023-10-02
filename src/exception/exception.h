@@ -22,4 +22,12 @@ private:
     int32 error_;
 };
 
+class HTTPReadError : public std::exception
+{
+public:
+    virtual const char* what() {
+        return "Failed to read byte(s) from HTTPSocket";
+    }
+};
+
 #endif
