@@ -6,8 +6,11 @@
 #include "robin_hood.h"
 
 #include "types.h"
+#include "http_maps.h"
+#include "http_status_codes.h"
 
 #define CRLF "\r\n"
+#define SP " "
 
 // Define needed enums
 enum class HTTPMethod {
@@ -45,22 +48,38 @@ struct RequestStartLine {
     HTTPMethod method_;
     std::string request_target_;
     HTTPVersion version_;
+
+    std::string fmt() {
+        std::string str = HTTPMethodList[static_cast<int>(method_)] + SP;
+        str += request_target_ + SP;
+        str += HTTPVersionList[static_cast<int>(version_)] + CRLF;
+        return str;
+    }
 };
 
 /// @brief Struct representing HTTP request
 struct HTTPRequest {
     RequestStartLine start_line_;
     robin_hood::unordered_flat_map<std::string, std::string> headers_;
-    char* body_;
-    uint32 body_size_;
+    std::string body_; // TODO: kind of want it to be char*, seems much cleaner
 
     /// @brief Function to turn HTTPRequest Struct into its string version
     /// @return Formatted HTTP request message
     std::string fmt() {
-        std::string str = "";
+        // Begin with the start line
+        std::string str = start_line_.fmt();
 
-        // Begin with Start Line
-        str += "HTTP/";
+        // Go through all the headers
+        robin_hood::unordered_flat_map<std::string, std::string>::iterator it;
+        for (it = headers_.begin(); it != headers_.end(); it++) {
+            str += it->first + ": " + it->second + CRLF;
+        }
+        str += CRLF;
+
+        // Add the body
+        str += body_;
+
+        return str;
     }
 };
 
@@ -68,17 +87,35 @@ struct HTTPRequest {
 struct ResponseStatusLine {
     HTTPVersion version_;
     HTTPStatusCode status_code_;
+
+    std::string fmt() {
+        std::string str = HTTPVersionList[static_cast<int>(version_)] + SP;
+        str += StatusCodeList[static_cast<int>(status_code_)].fmt() + CRLF;
+        return str;
+    }
 };
 
 /// @brief Struct representing HTTP response
 struct HTTPResponse {
     ResponseStatusLine status_line_;
     robin_hood::unordered_flat_map<std::string, std::string> headers_;
-    char* body_;
-    uint32 body_size_;
+    std::string body_;
 
     std::string fmt() {
-        // TODO
+        // Begin with the start line
+        std::string str = status_line_.fmt();
+
+        // Append all headers
+        robin_hood::unordered_flat_map<std::string, std::string>::iterator it;
+        for (it = headers_.begin(); it != headers_.end(); it++) {
+            str += it->first + ": " + it->second + CRLF;
+        }
+        str += CRLF;
+
+        // Append the body
+        str += body_;
+
+        return str;
     }
 };
 

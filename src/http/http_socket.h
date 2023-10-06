@@ -60,9 +60,9 @@ public:
     /**
      * HTTP FUNCTIONS
     */
-    
-    /// @brief Determine if bytes remain in a buffer, could signify pipelining or more messages
-    /// @return True if buffers are not empty
+
+    /// @brief Check for pending bytes in the socket
+    /// @return True if bytes are pending
     bool PendingBytes();
     
     /// @brief Send the completed HTTPRequest message

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <string>
 
 #include "exception/exception.h"
 #include "types.h"
@@ -118,5 +119,9 @@ bool HTTPSocket::PendingBytes() {
     idx_ = 0;
 
     return (buffer_size_ != 0);
+}
+
+void HTTPSocket::SendRequest(HTTPRequest *request) {
+    socket_.Send(request->fmt().c_str(), )
 }
 

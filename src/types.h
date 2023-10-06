@@ -17,4 +17,7 @@ typedef long int64;
 typedef float float32;
 typedef double float64;
 
+// Others
+typedef unsigned char byte;
+
 #endif
