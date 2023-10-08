@@ -154,12 +154,12 @@ bool HTTPSocket::PendingBytes() {
 
 void HTTPSocket::SendRequest(HTTPRequest& request) {
     std::string buff = request.fmt();
-    socket_.Send(buff.c_str(), buff.size() - 1); // Avoid '\0'
+    socket_.Send(buff.c_str(), buff.size()); // Avoid '\0'
 }
 
 void HTTPSocket::SendResponse(HTTPResponse& response) {
     std::string buff = response.fmt();
-    socket_.Send(buff.c_str(), buff.size() - 1); // Avoid '\0'
+    socket_.Send(buff.c_str(), buff.size()); // Avoid '\0'
 }
 
 void HTTPSocket::FetchNextRequest(HTTPRequest& request) {
