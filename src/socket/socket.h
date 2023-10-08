@@ -13,6 +13,11 @@ public:
     /// @brief Currently does nothing
     ~Socket();
 
+    Socket operator=(Socket sock) {
+        sockfd_ = sock.sockfd_;
+        return *this;
+    }
+
     /// @brief Checks if socket has valid socket file descriptor
     /// @return True is socket has valid file descriptor
     bool Valid();
@@ -31,6 +36,9 @@ public:
     
     /// @brief Shutdown RDWR of the socket
     void Shutdown();
+
+    /// @brief Close the socket
+    void Close();
 
     /// @brief Used to connect client socket to server
     /// @param host Hostname or IP Address of Server

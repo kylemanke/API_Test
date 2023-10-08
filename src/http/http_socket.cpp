@@ -3,14 +3,13 @@
 
 #include "exception/exception.h"
 #include "types.h"
-#include "stub_defines.h"
 
 #include "http_socket.h"
 
 #define BUFFER_SIZE 2048
 
 std::string to_lower(std::string str) {
-    for (int i = 0; i < str.size(); ++i) {
+    for (uint64 i = 0; i < str.size(); ++i) {
         if (str[i] >= 'A' && str[i] <= 'Z') {
             str[i] += 32;
         }
@@ -20,7 +19,7 @@ std::string to_lower(std::string str) {
 
 int32 atoi(const std::string str) {
     int32 ret_val = 0;
-    for (int i = str.size() - 1; i >= 0; i--) {
+    for (uint64 i = 0; i < str.size(); ++i) {
         ret_val *= 10;
         ret_val += str[i] - '0';
     }
@@ -28,7 +27,6 @@ int32 atoi(const std::string str) {
 }
 
 HTTPSocket::HTTPSocket() 
-    : socket_(-1)
 {
     buffer_ = new char[BUFFER_SIZE];
     idx_ = 0;
@@ -81,6 +79,10 @@ void HTTPSocket::Shutdown() {
     socket_.Shutdown();
 }
 
+void HTTPSocket::Close() {
+    socket_.Close();
+}
+
 char HTTPSocket::NextByte() {
     char ret_char;
 
@@ -98,8 +100,6 @@ char HTTPSocket::NextByte() {
 }
 
 char HTTPSocket::PeekByte() {
-    char ret_char;
-
     if (idx_ >= buffer_size_) {
         idx_ = 0;
         buffer_size_ = socket_.Recv(buffer_, buffer_max_);
@@ -131,7 +131,7 @@ uint32 HTTPSocket::NextBytes(char *dest, uint32 size) {
                 throw HTTPReadError();
             
             // Take what is needed
-            uint32 read_amount = min(buffer_size_, size - bytes_read);
+            uint32 read_amount = (buffer_size_ < size - bytes_read) ? (buffer_size_) : (size - bytes_read);
             memcpy(dest + bytes_read, buffer_, read_amount);
             idx_ += read_amount;
             bytes_read += read_amount;
@@ -176,8 +176,8 @@ void HTTPSocket::FetchNextRequest(HTTPRequest& request) {
     }
 
     // Fetch the body
-    if (request.headers_.find('content-length') != request.headers_.end())
-        request.body_ = ParseBody(atoi(request.headers_['content-length']));
+    if (request.headers_.find("content-length") != request.headers_.end())
+        request.body_ = ParseBody(atoi(request.headers_["content-length"]));
     
 }
 
@@ -194,8 +194,8 @@ void HTTPSocket::FetchNextResponse(HTTPResponse& response) {
     }
     
     // Fetch the body
-    if (response.headers_.find('content-length') != response.headers_.end())
-        response.body_ = ParseBody(atoi(response.headers_['content-length']));
+    if (response.headers_.find("content-length") != response.headers_.end())
+        response.body_ = ParseBody(atoi(response.headers_["content-length"]));
 }
 
 HTTPMethod HTTPSocket::ParseHTTPMethod() {
@@ -481,15 +481,15 @@ std::pair<std::string, std::string> HTTPSocket::ParseNextHeader() {
     std::pair<std::string, std::string> ret_val("", "");
 
     // Check that it is not a blank line
+    char c;
     if (PeekByte() == '\r') {
-        NextByte();
-        if (NextByte() != '\n')
+        c = NextByte();
+        if ((c = NextByte()) == '\n')
             return ret_val;
         else 
             throw HTTPReadError();
     }
 
-    char c;
     while ((c = NextByte()) != ':')
         ret_val.first += c;
     
@@ -508,10 +508,10 @@ std::pair<std::string, std::string> HTTPSocket::ParseNextHeader() {
     return ret_val;
 }
 
-std::string HTTPSocket::ParseBody(int32 body_size) {
+std::string HTTPSocket::ParseBody(uint32 body_size) {
     char* buffer = new char[body_size + 1];
 
-    if (NextBytes(buffer, body_size) != body_size)
+    if ((NextBytes(buffer, body_size) != body_size))
         throw HTTPReadError();
     buffer[body_size] = '\0';
     

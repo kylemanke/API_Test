@@ -57,6 +57,9 @@ public:
     /// @brief Shutdown the current socket
     void Shutdown();
 
+    /// @brief Close the current socket
+    void Close();
+
     /**
      * HTTP FUNCTIONS
     */
@@ -119,7 +122,7 @@ private:
     /// @brief Fetch the http body as a string
     /// @param body_size Size of the HTTP body
     /// @return String containing the HTTP body
-    std::string ParseBody(int32 body_size);
+    std::string ParseBody(uint32 body_size);
 
     /// @brief Fetch the next byte from the buffer
     /// @return Return the next byte, will throw HTTPReadError if nothing to be read

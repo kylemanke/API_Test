@@ -10,9 +10,6 @@
 
 Socket::Socket() {
     sockfd_ = -1;
-
-    if ((sockfd_ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        throw SocketException(errno);
 }
 
 Socket::Socket(int32 sockfd) {
@@ -46,7 +43,15 @@ int32 Socket::Send(const char *buffer, uint32 buff_size) {
 }
 
 void Socket::Shutdown() {
+    if (sockfd_ == -1) return;
     if (shutdown(sockfd_, SHUT_RDWR) == -1)
+        throw SocketException(errno);
+    sockfd_ = -1;
+}
+
+void Socket::Close() {
+    if (sockfd_ == -1) return;
+    if (close(sockfd_) == -1)
         throw SocketException(errno);
     sockfd_ = -1;
 }
@@ -54,6 +59,9 @@ void Socket::Shutdown() {
 void Socket::Connect(const char *hostname, const char *port) {
     struct addrinfo hints;
     struct addrinfo *result, *rp;
+
+    if ((sockfd_ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        throw SocketException(errno);
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_INET;
@@ -79,6 +87,9 @@ void Socket::Connect(const char *hostname, const char *port) {
 
 void Socket::Bind(uint16 port) {
     struct sockaddr_in serv_addr;
+
+    if ((sockfd_ = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+        throw SocketException(errno);
     
     // Set up the serv_addr
     memset(&serv_addr, 0, sizeof(serv_addr));
@@ -97,7 +108,7 @@ void Socket::Listen(uint32 backlog) {
 }
 
 Socket Socket::Accept() {
-    uint32 ret_val;
+    int32 ret_val;
     if ((ret_val = accept(sockfd_, nullptr, nullptr)) == -1)
         throw SocketException(errno);
     return Socket(ret_val);
